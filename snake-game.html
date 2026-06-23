@@ -1,174 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Neon Snake Game</title>
-<style>
-body{
-  text-align:center;
-  background:black;
-  color:#0f0;
-  font-family:Arial;
-}
-
-canvas{
-  background:#000;
-  border:3px solid #0f0;
-  box-shadow:0 0 20px #0f0;
-}
-
-button{
-  margin:5px;
-  padding:10px 15px;
-  font-size:18px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Snake Game</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+            margin-bottom: 5px;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 10px;
+        }
+        .stat-box {
+            background: #222;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            min-width: 100px;
+        }
+        .stat-box span {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stat-box label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+        }
+        /* Achievement Section */
+        #achievement-box {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: black;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            visibility: hidden; /* Hide until unlocked */
+        }
+        canvas {
+            border: 4px solid #0f0;
+            background-color: #000;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.3);
+            display: block;
+            margin: 10px auto;
+        }
+        .btn-container {
+            margin-top: 15px;
+        }
+        button {
+            background-color: #222;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: #0f0;
+            color: black;
+            box-shadow: 0 0 15px #0f0;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
 </head>
-
 <body>
 
-<h1>🐍 Neon Snake Game</h1>
-<h3>Score: <span id="score">0</span></h3>
-<h3>High Score: <span id="highscore">0</span></h3>
-
-<canvas id="game" width="400" height="400"></canvas>
-
-<br><br>
-
-<div>
-<button onclick="setDir('up')">⬆️</button><br>
-<button onclick="setDir('left')">⬅️</button>
-<button onclick="setDir('down')">⬇️</button>
-<button onclick="setDir('right')">➡️</button>
-</div>
-
-<br>
-<button onclick="restartGame()">Restart</button>
-
-<script>
-window.addEventListener("keydown", function(e) {
-    if(["", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) > -1) {
-        e.preventDefault();
-    }
-}, { passive: false});    
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-
-let snake,food,dx,dy,score,highscore,game;
-  let changingDirection = false;
-  const appleImg = new Image();
-appleImg.src = 'https://cdn-icons-png.flaticon.com/512/415/415733.png';
-
-highscore=localStorage.getItem("snakeHigh") || 0;
-document.getElementById("highscore").innerText=highscore;
-
-function start(){
- snake=[{x:200,y:200}];
- food=randomFood();
- dx=20; dy=0;
- score=0;
- document.getElementById("score").innerText=score;
-
- clearInterval(game);
- game=setInterval(draw,120);
-}
-
-function randomFood(){
- return{
-  x:Math.floor(Math.random()*20)*20,
-  y:Math.floor(Math.random()*20)*20
- };
-}
-
-function beep(){
- let ctxx=new AudioContext();
- let o=ctxx.createOscillator();
- o.connect(ctxx.destination);
- o.start();
- o.stop(ctxx.currentTime+0.1);
-}
-
-function setDir(d) {
-    if (changingDirection) return; 
+    <h1>SNAKE GAME</h1>
     
-    if(d === "up" && dy === 0) { dx = 0; dy = -20; changingDirection = true; }
-    if(d === "down" && dy === 0) { dx = 0; dy = 20; changingDirection = true; }
-    if(d === "left" && dx === 0) { dx = -20; dy = 0; changingDirection = true; }
-    if(d === "right" && dx === 0) { dx = 20; dy = 0; changingDirection = true; }
-}
+    <div id="achievement-box">🏆 Rank: <span id="rank-text">Beginner</span></div>
 
+    <div class="stats-container">
+        <div class="stat-box">
+            <span id="score">0</span>
+            <label>Score</label>
+        </div>
+        <div class="stat-box">
+            <span id="highscore">0</span>
+            <label>High Score</label>
+        </div>
+    </div>
 
-document.addEventListener("keydown",e=>{
- if(e.key==="ArrowUp")setDir("up");
- if(e.key==="ArrowDown")setDir("down");
- if(e.key==="ArrowLeft")setDir("left");
- if(e.key==="ArrowRight")setDir("right");
-});
-
-function draw(){
-    changingDirection = false;
-    ctx.clearRect(0, 0, 400, 400);
-
-    snake.forEach((s,i)=>{
-        ctx.fillStyle=i==0?"#ff0":"#0f0";
-        ctx.shadowBlur=10;
-        ctx.shadowColor="#0f0";
-        ctx.fillRect(s.x, s.y, 20, 20);
-    });
-
+    <canvas id="game" width="400" height="400"></canvas>
     
-    ctx.drawImage(appleImg, food.x, food.y, 20, 20);
+    <div class="btn-container">
+        <button id="pause-btn" onclick="togglePause()">Pause</button>
+        <button onclick="restartGame()">Restart</button>
+    </div>
 
-    let head={x:snake[0].x+dx, y:snake[0].y+dy};
- });
+    <script>
+        // Prevent scrolling with keys
+        window.addEventListener("keydown", function(e) {
+            if([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
- ctx.fillStyle="#f00";
- ctx.shadowColor="#f00";
- ctx.fillRect(food.x,food.y,20,20);
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
 
- let head={x:snake[0].x+dx,y:snake[0].y+dy};
+        let snake, food, dx, dy, score, highscore, game;
+        let changingDirection = false;
+        let isPaused = false; // Pause state variable
 
- if(head.x<0||head.y<0||head.x>=400||head.y>=400){
-  gameOver();
-  return;
- }
+        // Load Apple Image
+        const appleImg = new Image();
+        appleImg.src = 'https://i.imgur.com/v0Xsh9f.png';
 
- for(let i=1;i<snake.length;i++){
-  if(head.x===snake[i].x && head.y===snake[i].y){
-   gameOver();
-   return;
-  }
- }
+        highscore = localStorage.getItem("snakeHigh") || 0;
+        document.getElementById("highscore").innerText = highscore;
 
- snake.unshift(head);
+        function start(){
+            snake = [{x: 200, y: 200}];
+            food = randomFood();
+            dx = 20;
+            dy = 0;
+            score = 0;
+            isPaused = false;
+            document.getElementById("pause-btn").innerText = "Pause";
+            document.getElementById("score").innerText = score;
+            updateAchievements(0);
+            if(game) clearInterval(game);
+            game = setInterval(draw, 100);
+        }
 
- if(head.x===food.x && head.y===food.y){
-  score++;
-  beep();
-  document.getElementById("score").innerText=score;
+        function randomFood(){
+            return {
+                x: Math.floor(Math.random() * 20) * 20,
+                y: Math.floor(Math.random() * 20) * 20
+            };
+        }
 
-  if(score>highscore){
-   highscore=score;
-   localStorage.setItem("snakeHigh",highscore);
-   document.getElementById("highscore").innerText=highscore;
-  }
+        function beep(){
+            let ctxxx = new AudioContext();
+            let o = ctxxx.createOscillator();
+            o.connect(ctxxx.destination);
+            o.start();
+            o.stop(ctxxx.currentTime + 0.1);
+        }
 
-  food=randomFood();
- }else{
-  snake.pop();
- }
-}
+        // Pause / Resume Logic
+        function togglePause() {
+            if (isPaused) {
+                // Resume game
+                game = setInterval(draw, 100);
+                document.getElementById("pause-btn").innerText = "Pause";
+                isPaused = false;
+            } else {
+                // Pause game
+                clearInterval(game);
+                document.getElementById("pause-btn").innerText = "Resume";
+                isPaused = true;
+                
+                // Draw 'PAUSED' on screen
+                ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+                ctx.fillRect(0, 0, 400, 400);
+                ctx.fillStyle = "#0f0";
+                ctx.font = "bold 30px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("GAME PAUSED", 200, 200);
+            }
+        }
 
-function gameOver(){
- clearInterval(game);
- alert("Game Over! Score: "+score);
-}
+        function setDir(d) {
+            if (changingDirection || isPaused) return; // Ignore input if paused
+            
+            if(d === "up" && dy === 0) { dx = 0; dy = -20; changingDirection = true; }
+            if(d === "down" && dy === 0) { dx = 0; dy = 20; changingDirection = true; }
+            if(d === "left" && dx === 0) { dx = -20; dy = 0; changingDirection = true; }
+            if(d === "right" && dx === 0) { dx = 20; dy = 0; changingDirection = true; }
+        }
 
-function restartGame(){
- start();
-}
+        document.addEventListener("keydown", e => {
+            if(e.key === "ArrowUp") setDir("up");
+            if(e.key === "ArrowDown") setDir("down");
+            if(e.key === "ArrowLeft") setDir("left");
+            if(e.key === "ArrowRight") setDir("right");
+            if(e.key.toLowerCase() === "p" || e.key === " ") { // Press 'P' or 'Space' to Pause
+                togglePause();
+            }
+        });
 
-start();
-</script>
+        // Creative Achievement System
+        function updateAchievements(currentScore) {
+            const box = document.getElementById("achievement-box");
+            const text = document.getElementById("rank-text");
+            
+            if (currentScore >= 30) {
+                box.style.visibility = "visible";
+                box.style.background = "linear-gradient(45deg, #00ffff, #0080ff)";
+                text.innerText = "⚡ Golden Legend ⚡";
+            } else if (currentScore >= 15) {
+                box.style.visibility = "visible";
+                box.style.background = "linear-gradient(45deg, #e5e5e5, #999999)";
+                text.innerText = "🥈 Silver Hunter";
+            } else if (currentScore >= 5) {
+                box.style.visibility = "visible";
+                box.style.background = "linear-gradient(45deg, #cd7f32, #a0522d)";
+                text.innerText = "🥉 Bronze Snake";
+            } else {
+                box.style.visibility = "hidden"; // Hide for score < 5
+            }
+        }
 
+        function draw(){
+            if (isPaused) return;
+            
+            changingDirection = false;
+            ctx.clearRect(0, 0, 400, 400);
+
+            // Draw Snake
+            snake.forEach((s, i) => {
+                ctx.fillStyle = i == 0 ? "#ff0" : "#0f0";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#0f0";
+                ctx.fillRect(s.x, s.y, 20, 20);
+            });
+
+            // Draw Apple
+            ctx.drawImage(appleImg, food.x, food.y, 20, 20);
+
+            let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+
+            if(head.x < 0 || head.y < 0 || head.x >= 400 || head.y >= 400){
+                gameOver();
+                return;
+            }
+
+            for(let i = 1; i < snake.length; i++){
+                if(head.x === snake[i].x && head.y === snake[i].y){
+                    gameOver();
+                    return;
+                }
+            }
+
+            snake.unshift(head);
+
+            if(head.x === food.x && head.y === food.y){
+                beep();
+                score++;
+                document.getElementById("score").innerText = score;
+                updateAchievements(score); // Check for achievements
+                
+                if(score > highscore){
+                    highscore = score;
+                    localStorage.setItem("snakeHigh", highscore);
+                    document.getElementById("highscore").innerText = highscore;
+                }
+                food = randomFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function gameOver(){
+            clearInterval(game);
+            alert("Game Over! Your Score: " + score);
+            start();
+        }
+
+        function restartGame(){
+            start();
+        }
+
+        // Start the game initially
+        start();
+    </script>
 </body>
 </html>
