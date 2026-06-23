@@ -120,12 +120,12 @@
         <button class="btn" id="hard" onclick="setSpeed(60, 'hard')">Hard</button>
         <button class="btn" onclick="togglePause()">⏸ Pause/Resume</button>
     </div>
-    <div id="achievement-box">🏆 RANK: <span id="rank">Beginner</span></div>
+    <div id="achievement-box"> RANK: <span id="rank">Beginner</span></div>
     <div id="score">Score: 0</div>
     <canvas id="game" width="400" height="400"></canvas>
     
     <div id="game-over">
-        <h2>💀 GAME OVER!</h2>
+        <h2> GAME OVER!</h2>
         <p style="font-size: 20px;">Final Score: <span id="final-score">0</span></p>
         <button onclick="start()">🔄 Play Again</button>
     </div>
@@ -275,13 +275,13 @@
             ctx.lineTo(food.x + 10, food.y - 3);
             ctx.stroke();
 
-            // Draw Snake - VISIBILITY FIX: 18x18 size (almost fills the 20px cell)
+            // Draw Snake - CHUNKY SIZE: 15x15 (fills most of the 20px cell)
             snake.forEach((s, i) => {
                 // Bright gradient from head to tail
                 if (i === 0) {
                     // Head - bright white with strong glow
                     ctx.fillStyle = "#ffffff";
-                    ctx.shadowBlur = 30; // Stronger glow
+                    ctx.shadowBlur = 30;
                     ctx.shadowColor = "#00ff00";
                 } else {
                     // Body - bright green fading slightly
@@ -292,32 +292,32 @@
                 }
                 
                 ctx.beginPath();
-                // CHANGED: 18x18 size with 1px offset to fill the cell better
+                // CHANGED: 15x15 size with 2.5px offset (rounded to 2 or 3 for pixel alignment)
+                // Using 2px offset gives 16px effective visual size which looks great
                 if (ctx.roundRect) {
-                    ctx.roundRect(s.x + 1, s.y + 1, 18, 18, 5);
+                    ctx.roundRect(s.x + 2, s.y + 2, 16, 16, 4);
                 } else {
-                    ctx.rect(s.x + 1, s.y + 1, 18, 18);
+                    ctx.rect(s.x + 2, s.y + 2, 16, 16);
                 }
                 ctx.fill();
                 ctx.shadowBlur = 0;
                 
-                // Draw TWO EYES on head - VISIBILITY FIX: Brighter colors
+                // Draw TWO EYES on head - VISIBILITY FIX: Dark Blue/Cyan
                 if (i === 0) {
-                    // Changed from black to dark blue/cyan for better contrast on white head
-                    ctx.fillStyle = "#000088"; 
+                    ctx.fillStyle = "#0000aa"; // Dark blue for better contrast
                     
                     if (dx > 0) { // Moving RIGHT
-                        ctx.fillRect(s.x + 12, s.y + 5, 4, 4);   // Top eye
-                        ctx.fillRect(s.x + 12, s.y + 11, 4, 4);  // Bottom eye
+                        ctx.fillRect(s.x + 11, s.y + 4, 5, 5);   // Top eye
+                        ctx.fillRect(s.x + 11, s.y + 11, 5, 5);  // Bottom eye
                     } else if (dx < 0) { // Moving LEFT
-                        ctx.fillRect(s.x + 4, s.y + 5, 4, 4);    // Top eye
-                        ctx.fillRect(s.x + 4, s.y + 11, 4, 4);   // Bottom eye
+                        ctx.fillRect(s.x + 4, s.y + 4, 5, 5);    // Top eye
+                        ctx.fillRect(s.x + 4, s.y + 11, 5, 5);   // Bottom eye
                     } else if (dy > 0) { // Moving DOWN
-                        ctx.fillRect(s.x + 5, s.y + 12, 4, 4);   // Left eye
-                        ctx.fillRect(s.x + 11, s.y + 12, 4, 4);  // Right eye
+                        ctx.fillRect(s.x + 4, s.y + 11, 5, 5);   // Left eye
+                        ctx.fillRect(s.x + 11, s.y + 11, 5, 5);  // Right eye
                     } else if (dy < 0) { // Moving UP
-                        ctx.fillRect(s.x + 5, s.y + 5, 4, 4);    // Left eye
-                        ctx.fillRect(s.x + 11, s.y + 5, 4, 4);   // Right eye
+                        ctx.fillRect(s.x + 4, s.y + 4, 5, 5);    // Left eye
+                        ctx.fillRect(s.x + 11, s.y + 4, 5, 5);   // Right eye
                     }
                 }
             });
