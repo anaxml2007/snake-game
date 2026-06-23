@@ -84,12 +84,15 @@ function beep(){
  o.stop(ctxx.currentTime+0.1);
 }
 
-function setDir(d){
- if(d==="up" && dy===0){dx=0;dy=-20;}
- if(d==="down" && dy===0){dx=0;dy=20;}
- if(d==="left" && dx=== -20){dx=-20;dy=0;}
- if(d==="right" && dx=== 20){dx=20;dy=0;}
+function setDir(d) {
+    if (changingDirection) return; 
+    
+    if(d === "up" && dy === 0) { dx = 0; dy = -20; changingDirection = true; }
+    if(d === "down" && dy === 0) { dx = 0; dy = 20; changingDirection = true; }
+    if(d === "left" && dx === 0) { dx = -20; dy = 0; changingDirection = true; }
+    if(d === "right" && dx === 0) { dx = 20; dy = 0; changingDirection = true; }
 }
+
 
 document.addEventListener("keydown",e=>{
  if(e.key==="ArrowUp")setDir("up");
