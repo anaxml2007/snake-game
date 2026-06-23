@@ -2,45 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Retro Neon Snake</title>
+    <title>Sleek Neon Snake</title>
     <style>
         body { background: #050505; color: #fff; text-align: center; font-family: sans-serif; overflow: hidden; }
         .lvl-container { margin: 10px; }
-        .lvl-btn { background: #222; color: #fff; border: 1px solid #444; padding: 5px 15px; cursor: pointer; }
-        .lvl-btn.active { background: #0f0; color: #000; font-weight: bold; }
-        #achievement-box { background: #222; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px; border: 1px solid #444; color: #888; }
-        canvas { border: 5px solid #0f0; background: #000; display: block; margin: 10px auto; }
-        button { background: #111; color: #0f0; border: 2px solid #0f0; padding: 10px 20px; cursor: pointer; }
+        .lvl-btn { background: #222; color: #fff; border: 1px solid #444; padding: 6px 15px; cursor: pointer; border-radius: 4px; margin: 2px; }
+        .lvl-btn.active { background: #0f0; color: #000; font-weight: bold; border-color: #0f0; box-shadow: 0 0 10px #0f0; }
+        #achievement-box { background: #222; padding: 8px 18px; border-radius: 25px; display: inline-block; margin: 10px; border: 1px solid #fff; font-weight: bold; color: #fff; }
+        canvas { border: 5px solid #0f0; background: #000; display: block; margin: 10px auto; box-shadow: 0 0 20px rgba(0,255,0,0.3); border-radius: 8px; }
+        .main-btn { background: #111; color: #0f0; border: 2px solid #0f0; padding: 10px 25px; cursor: pointer; font-weight: bold; margin: 5px; }
     </style>
 </head>
 <body>
     <h1>NEON SNAKE</h1>
     <div class="lvl-container">
-        <button class="lvl-btn" onclick="setLevel('easy')">Easy</button>
-        <button class="lvl-btn active" onclick="setLevel('medium')">Medium</button>
-        <button class="lvl-btn" onclick="setLevel('hard')">Hard</button>
+        <button class="lvl-btn" id="easy" onclick="setSpeed(180, 'easy')">Easy</button>
+        <button class="lvl-btn active" id="medium" onclick="setSpeed(110, 'medium')">Medium</button>
+        <button class="lvl-btn" id="hard" onclick="setSpeed(60, 'hard')">Hard</button>
     </div>
-    <div id="achievement-box">RANK: <span id="rank-text">Beginner</span></div>
+    <div id="achievement-box">🏆 RANK: <span id="rank">Beginner</span></div>
     <div id="score">Score: 0</div>
     <canvas id="game" width="400" height="400"></canvas>
-    <button onclick="location.reload()">Restart</button>
+    <div>
+        <button class="main-btn" onclick="location.reload()">Restart</button>
+    </div>
 
     <script>
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
         let snake = [{x: 200, y: 200}], food = {x: 100, y: 100}, dx = 20, dy = 0, score = 0, speed = 110;
-        
-        function setLevel(lvl) {
-            if(lvl === 'easy') speed = 180;
-            else if(lvl === 'medium') speed = 110;
-            else speed = 60;
+
+        function setSpeed(s, id) {
+            speed = s;
+            document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
             start();
         }
 
         function start() {
             snake = [{x: 200, y: 200}]; score = 0; dx = 20; dy = 0;
             document.getElementById("score").innerText = "Score: 0";
-            document.getElementById("rank-text").innerText = "Beginner";
+            document.getElementById("rank").innerText = "Beginner";
             clearInterval(window.gameLoop);
             window.gameLoop = setInterval(draw, speed);
         }
@@ -48,32 +50,41 @@
         function draw() {
             ctx.fillStyle = "#000"; ctx.fillRect(0,0,400,400);
             
-            // Draw Snake
+            // Draw Snake (with eyes)
             ctx.fillStyle = "#0f0";
-            snake.forEach(s => ctx.fillRect(s.x, s.y, 18, 18));
+            snake.forEach((s, i) => {
+                ctx.fillRect(s.x+2, s.y+2, 16, 16);
+                if(i === 0) { // Head with eyes
+                    ctx.fillStyle = "#fff";
+                    ctx.fillRect(s.x+5, s.y+5, 4, 4); ctx.fillRect(s.x+11, s.y+5, 4, 4);
+                    ctx.fillStyle = "#0f0";
+                }
+            });
 
             // Draw Apple
             ctx.fillStyle = "#f00";
             ctx.beginPath();
-            ctx.arc(food.x + 10, food.y + 10, 8, 0, Math.PI*2);
+            ctx.arc(food.x+10, food.y+10, 8, 0, Math.PI*2);
             ctx.fill();
+            ctx.fillStyle = "#0f0"; // Leaf
+            ctx.fillRect(food.x+8, food.y+2, 4, 4);
 
-            // Logic
             let head = {x: snake[0].x + dx, y: snake[0].y + dy};
             if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) return start();
             snake.unshift(head);
             if(head.x === food.x && head.y === food.y) {
                 score++; food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
                 document.getElementById("score").innerText = "Score: " + score;
-                if(score >= 5) document.getElementById("rank-text").innerText = "Bronze Snake";
+                if(score >= 5) document.getElementById("rank").innerText = "Bronze Viper";
+                if(score >= 15) document.getElementById("rank").innerText = "Silver Legend";
             } else snake.pop();
         }
-        
+
         document.addEventListener("keydown", e => {
-            if(e.key === "ArrowUp" && dy === 0) { dx=0; dy=-20; }
-            if(e.key === "ArrowDown" && dy === 0) { dx=0; dy=20; }
-            if(e.key === "ArrowLeft" && dx === 0) { dx=-20; dy=0; }
-            if(e.key === "ArrowRight" && dx === 0) { dx=20; dy=0; }
+            if(e.key==="ArrowUp" && dy===0) {dx=0; dy=-20;}
+            if(e.key==="ArrowDown" && dy===0) {dx=0; dy=20;}
+            if(e.key==="ArrowLeft" && dx===0) {dx=-20; dy=0;}
+            if(e.key==="ArrowRight" && dx===0) {dx=20; dy=0;}
         });
         start();
     </script>
