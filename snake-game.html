@@ -277,10 +277,20 @@
         }
 
         function gameOver(){
-            clearInterval(game);
-            alert("Game Over! Your Score: " + score);
-            start();
-        }
+          function gameOver(){
+    clearInterval(game); 
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillRect(0, 0, 400, 400);
+    ctx.fillStyle = "#ff0000"; // ചുവപ്പ് നിറം
+    ctx.font = "bold 40px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("GAME OVER", 200, 200);
+    
+
+    setTimeout(() => {
+        start();
+    }, 1000);
+}
 
         function restartGame(){
             start();
