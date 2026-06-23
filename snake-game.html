@@ -87,8 +87,8 @@ function beep(){
 function setDir(d){
  if(d==="up" && dy===0){dx=0;dy=-20;}
  if(d==="down" && dy===0){dx=0;dy=20;}
- if(d==="left" && dx===0){dx=-20;dy=0;}
- if(d==="right" && dx===0){dx=20;dy=0;}
+ if(d==="left" && dx=== -20){dx=-20;dy=0;}
+ if(d==="right" && dx=== 20){dx=20;dy=0;}
 }
 
 document.addEventListener("keydown",e=>{
