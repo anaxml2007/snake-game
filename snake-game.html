@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sleek Neon Snake with Levels</title>
+    <title>Sleek Neon Snake with Levels & Achievements</title>
     <style>
         body {
             background-color: #050505;
@@ -70,16 +70,15 @@
             text-transform: uppercase;
         }
         #achievement-box {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
+            background: #222;
+            color: #888;
             padding: 8px 18px;
             border-radius: 25px;
             display: inline-block;
             font-weight: bold;
             margin-bottom: 15px;
             font-size: 14px;
-            visibility: hidden;
-            border: 1px solid #fff;
+            border: 1px solid #444;
         }
         canvas {
             border: 5px solid #0f0;
@@ -151,8 +150,7 @@
         let isPaused = false;
         const gridSize = 20;
         
-        // Game speeds for different levels (in milliseconds)
-        let currentSpeed = 120; // Default Medium speed
+        let currentSpeed = 110; // Default Medium speed
         let currentLevel = 'medium';
 
         highscore = localStorage.getItem("snakeHigh") || 0;
@@ -174,27 +172,22 @@
             gameInterval = setInterval(gameLoop, currentSpeed);
         }
 
-        // Difficulty level setter
         function setLevel(lvl) {
             currentLevel = lvl;
-            // Remove active class from all buttons
             document.getElementById("easy-btn").classList.remove("active");
             document.getElementById("medium-btn").classList.remove("active");
             document.getElementById("hard-btn").classList.remove("active");
             
-            // Add active class to current button and change speed
             if (lvl === 'easy') {
-                currentSpeed = 180; // Slower
+                currentSpeed = 180;
                 document.getElementById("easy-btn").classList.add("active");
             } else if (lvl === 'medium') {
-                currentSpeed = 110; // Normal
+                currentSpeed = 110;
                 document.getElementById("medium-btn").classList.add("active");
             } else if (lvl === 'hard') {
-                currentSpeed = 65;  // Very Fast!
+                currentSpeed = 65;
                 document.getElementById("hard-btn").classList.add("active");
             }
-            
-            // Restart game automatically with new speed
             start();
         }
 
@@ -271,37 +264,37 @@
             }
         });
 
+        // Dynamic Achievement System
         function updateAchievements(currentScore) {
-    const box = document.getElementById("achievement-box");
-    const text = document.getElementById("rank-text");
-    
-    // തുടക്കത്തിൽ തന്നെ ബോക്സ് കാണിക്കുക
-    box.style.visibility = "visible"; 
-    
-    if (currentScore >= 30) {
-        box.style.background = "linear-gradient(135deg, #00ffff, #0080ff)";
-        box.style.boxShadow = "0 0 15px #00ffff";
-        box.style.color = "#000";
-        text.innerText = "⚡ NEON LEGEND ⚡";
-    } else if (currentScore >= 15) {
-        box.style.background = "linear-gradient(135deg, #e5e5e5, #999999)";
-        box.style.boxShadow = "0 0 15px #fff";
-        box.style.color = "#000";
-        text.innerText = "🥈 Silver Viper";
-    } else if (currentScore >= 5) {
-        box.style.background = "linear-gradient(135deg, #cd7f32, #a0522d)";
-        box.style.boxShadow = "0 0 15px #cd7f32";
-        box.style.color = "#fff";
-        text.innerText = "🥉 Bronze Snake";
-    } else {
-        // സ്കോർ 5-ൽ താഴെയാണെങ്കിൽ സ്റ്റാർട്ടിങ് റാങ്ക്
-        box.style.background = "#222";
-        box.style.boxShadow = "none";
-        box.style.color = "#888";
-        box.style.border = "1px solid #444";
-        text.innerText = "Beginner";
-    }
-}
+            const box = document.getElementById("achievement-box");
+            const text = document.getElementById("rank-text");
+            
+            if (currentScore >= 30) {
+                box.style.background = "linear-gradient(135deg, #00ffff, #0080ff)";
+                box.style.boxShadow = "0 0 15px #00ffff";
+                box.style.color = "#000";
+                box.style.border = "1px solid #fff";
+                text.innerText = "⚡ NEON LEGEND ⚡";
+            } else if (currentScore >= 15) {
+                box.style.background = "linear-gradient(135deg, #e5e5e5, #999999)";
+                box.style.boxShadow = "0 0 15px #fff";
+                box.style.color = "#000";
+                box.style.border = "1px solid #fff";
+                text.innerText = "🥈 Silver Viper";
+            } else if (currentScore >= 5) {
+                box.style.background = "linear-gradient(135deg, #cd7f32, #a0522d)";
+                box.style.boxShadow = "0 0 15px #cd7f32";
+                box.style.color = "#fff";
+                box.style.border = "1px solid #fff";
+                text.innerText = "🥉 Bronze Snake";
+            } else {
+                box.style.background = "#222";
+                box.style.boxShadow = "none";
+                box.style.color = "#888";
+                box.style.border = "1px solid #444";
+                text.innerText = "Beginner";
+            }
+        }
 
         function gameLoop() {
             if (isPaused) return;
@@ -348,14 +341,14 @@
             ctx.fillStyle = "#000";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Snake
+            // Draw Shaped Neon Snake
             snake.forEach((part, i) => {
                 const isHead = (i === 0);
                 ctx.shadowBlur = isHead ? 15 : 10;
                 ctx.shadowColor = "#0f0";
                 
                 if (isHead) {
-                    ctx.fillStyle = "#ff0"; // Yellow head
+                    ctx.fillStyle = "#ff0"; // Yellow Head
                     drawRoundedRect(ctx, part.x + 1, part.y + 1, gridSize - 2, gridSize - 2, 6);
                     ctx.fill();
 
@@ -379,28 +372,27 @@
                         ctx.fillRect(part.x + gridSize - eyeOffset - eyeSize, part.y + gridSize - eyeOffset - eyeSize, eyeSize, eyeSize);
                     }
                 } else {
-                    ctx.fillStyle = "#0f0"; // Sleek Green body
+                    ctx.fillStyle = "#0f0"; // Sleek Green Body
                     drawRoundedRect(ctx, part.x + 2, part.y + 2, gridSize - 4, gridSize - 4, 4);
                     ctx.fill();
                 }
             });
 
-            // --- CUSTOM APPLE VECTOR DRAWING (No Image Link Needed!) ---
+            // --- Vector Drawn Apple ---
             ctx.shadowBlur = 12;
             ctx.shadowColor = "#f00";
             
             let centerX = food.x + gridSize / 2;
             let centerY = food.y + gridSize / 2;
             
-            // 1. Red Apple Body (Circle)
             ctx.fillStyle = "#ff2222";
             ctx.beginPath();
             ctx.arc(centerX, centerY + 1, 8, 0, Math.PI * 2);
             ctx.fill();
             
-            ctx.shadowBlur = 0; // Disable blur for details
+            ctx.shadowBlur = 0;
             
-            // 2. Apple Stem (തണ്ട് - Brown line)
+            // Stem
             ctx.strokeStyle = "#8B4513";
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -408,7 +400,7 @@
             ctx.quadraticCurveTo(centerX + 3, centerY - 11, centerX + 5, centerY - 10);
             ctx.stroke();
             
-            // 3. Apple Leaf (ഇല - Green leaf)
+            // Leaf
             ctx.fillStyle = "#22cc22";
             ctx.beginPath();
             ctx.ellipse(centerX + 4, centerY - 9, 3, 1.5, Math.PI / 4, 0, Math.PI * 2);
