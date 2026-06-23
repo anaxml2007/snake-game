@@ -2,453 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sleek Neon Snake with Levels & Achievements</title>
+    <title>Retro Neon Snake</title>
     <style>
-        body {
-            background-color: #050505;
-            color: #fff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            overflow: hidden;
-        }
-        h1 {
-            color: #0f0;
-            text-shadow: 0 0 15px #0f0, 0 0 5px #fff;
-            margin-bottom: 5px;
-            font-size: 32px;
-            letter-spacing: 2px;
-        }
-        
-        /* Difficulty Buttons Styling */
-        .level-container {
-            margin-bottom: 15px;
-        }
-        .lvl-btn {
-            background-color: #222;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 6px 15px;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 4px;
-            margin: 0 5px;
-            transition: all 0.2s;
-        }
-        .lvl-btn.active {
-            background-color: #0f0;
-            color: #000;
-            font-weight: bold;
-            box-shadow: 0 0 10px #0f0;
-            border-color: #0f0;
-        }
-
-        .stats-container {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-bottom: 15px;
-        }
-        .stat-box {
-            background: rgba(34, 34, 34, 0.8);
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid #333;
-            min-width: 100px;
-        }
-        .stat-box span {
-            display: block;
-            font-size: 22px;
-            font-weight: bold;
-            color: #fff;
-        }
-        .stat-box label {
-            font-size: 12px;
-            color: #aaa;
-            text-transform: uppercase;
-        }
-        #achievement-box {
-            background: #222;
-            color: #888;
-            padding: 8px 18px;
-            border-radius: 25px;
-            display: inline-block;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 14px;
-            border: 1px solid #444;
-        }
-        canvas {
-            border: 5px solid #0f0;
-            background-color: #000;
-            box-shadow: 0 0 35px rgba(0, 255, 0, 0.4);
-            display: block;
-            margin: 0 auto;
-            border-radius: 8px;
-        }
-        .btn-container {
-            margin-top: 15px;
-        }
-        button.main-btn {
-            background-color: #111;
-            color: #0f0;
-            border: 2px solid #0f0;
-            padding: 10px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 0 5px;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-        }
-        button.main-btn:hover {
-            background-color: #0f0;
-            color: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
-        }
+        body { background: #050505; color: #fff; text-align: center; font-family: sans-serif; overflow: hidden; }
+        .lvl-container { margin: 10px; }
+        .lvl-btn { background: #222; color: #fff; border: 1px solid #444; padding: 5px 15px; cursor: pointer; }
+        .lvl-btn.active { background: #0f0; color: #000; font-weight: bold; }
+        #achievement-box { background: #222; padding: 5px 15px; border-radius: 20px; display: inline-block; margin-bottom: 10px; border: 1px solid #444; color: #888; }
+        canvas { border: 5px solid #0f0; background: #000; display: block; margin: 10px auto; }
+        button { background: #111; color: #0f0; border: 2px solid #0f0; padding: 10px 20px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <h1>NEON SNAKE</h1>
-    
-    <div class="level-container">
-        <button class="lvl-btn" id="easy-btn" onclick="setLevel('easy')">Easy</button>
-        <button class="lvl-btn active" id="medium-btn" onclick="setLevel('medium')">Medium</button>
-        <button class="lvl-btn" id="hard-btn" onclick="setLevel('hard')">Hard</button>
+    <div class="lvl-container">
+        <button class="lvl-btn" onclick="setLevel('easy')">Easy</button>
+        <button class="lvl-btn active" onclick="setLevel('medium')">Medium</button>
+        <button class="lvl-btn" onclick="setLevel('hard')">Hard</button>
     </div>
-
-    <div id="achievement-box">🏆 RANK: <span id="rank-text">Beginner</span></div>
-
-    <div class="stats-container">
-        <div class="stat-box">
-            <span id="score">0</span>
-            <label>Score</label>
-        </div>
-        <div class="stat-box">
-            <span id="highscore">0</span>
-            <label>High Score</label>
-        </div>
-    </div>
-
+    <div id="achievement-box">RANK: <span id="rank-text">Beginner</span></div>
+    <div id="score">Score: 0</div>
     <canvas id="game" width="400" height="400"></canvas>
-    
-    <div class="btn-container">
-        <button class="main-btn" id="pause-btn" onclick="togglePause()">Pause</button>
-        <button class="main-btn" onclick="restartGame()">Restart</button>
-    </div>
+    <button onclick="location.reload()">Restart</button>
 
     <script>
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
-
-        let snake, food, dx, dy, score, highscore, gameInterval;
-        let changingDirection = false;
-        let isPaused = false;
-        const gridSize = 20;
+        let snake = [{x: 200, y: 200}], food = {x: 100, y: 100}, dx = 20, dy = 0, score = 0, speed = 110;
         
-        let currentSpeed = 110; // Default Medium speed
-        let currentLevel = 'medium';
-
-        highscore = localStorage.getItem("snakeHigh") || 0;
-        document.getElementById("highscore").innerText = highscore;
-
-        function start(){
-            snake = [{x: 200, y: 200}];
-            food = randomFood();
-            dx = gridSize;
-            dy = 0;
-            score = 0;
-            isPaused = false;
-            document.getElementById("pause-btn").innerText = "Pause";
-            document.getElementById("score").innerText = score;
-            updateAchievements(0);
-            changingDirection = false;
-            
-            if(gameInterval) clearInterval(gameInterval);
-            gameInterval = setInterval(gameLoop, currentSpeed);
-        }
-
         function setLevel(lvl) {
-            currentLevel = lvl;
-            document.getElementById("easy-btn").classList.remove("active");
-            document.getElementById("medium-btn").classList.remove("active");
-            document.getElementById("hard-btn").classList.remove("active");
-            
-            if (lvl === 'easy') {
-                currentSpeed = 180;
-                document.getElementById("easy-btn").classList.add("active");
-            } else if (lvl === 'medium') {
-                currentSpeed = 110;
-                document.getElementById("medium-btn").classList.add("active");
-            } else if (lvl === 'hard') {
-                currentSpeed = 65;
-                document.getElementById("hard-btn").classList.add("active");
-            }
+            if(lvl === 'easy') speed = 180;
+            else if(lvl === 'medium') speed = 110;
+            else speed = 60;
             start();
         }
 
-        function randomFood(){
-            let validPos = false;
-            let foodX, foodY;
-            while (!validPos) {
-                foodX = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
-                foodY = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
-                validPos = true;
-                for (let part of snake) {
-                    if (part.x === foodX && part.y === foodY) {
-                        validPos = false;
-                        break;
-                    }
-                }
-            }
-            return { x: foodX, y: foodY };
-        }
-
-        function beep(){
-            try {
-                let ctxxx = new (window.AudioContext || window.webkitAudioContext)();
-                let o = ctxxx.createOscillator();
-                o.type = 'sine';
-                o.frequency.setValueAtTime(800, ctxxx.currentTime);
-                o.connect(ctxxx.destination);
-                o.start();
-                o.stop(ctxxx.currentTime + 0.1);
-            } catch (e) {}
-        }
-
-        function togglePause() {
-            if (isPaused) {
-                gameInterval = setInterval(gameLoop, currentSpeed);
-                document.getElementById("pause-btn").innerText = "Pause";
-                isPaused = false;
-            } else {
-                clearInterval(gameInterval);
-                document.getElementById("pause-btn").innerText = "Resume";
-                isPaused = true;
-                drawPaused();
-            }
-        }
-
-        function drawPaused() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#0f0";
-            ctx.font = "bold 34px 'Segoe UI'";
-            ctx.textAlign = "center";
-            ctx.textBaseline = 'middle';
-            ctx.fillText("GAME PAUSED", canvas.width/2, canvas.height/2);
-        }
-
-        function setDir(d) {
-            if (changingDirection || isPaused) return;
-            if(d === "up" && dy === 0) { dx = 0; dy = -gridSize; changingDirection = true; }
-            if(d === "down" && dy === 0) { dx = 0; dy = gridSize; changingDirection = true; }
-            if(d === "left" && dx === 0) { dx = -gridSize; dy = 0; changingDirection = true; }
-            if(d === "right" && dx === 0) { dx = gridSize; dy = 0; changingDirection = true; }
-        }
-
-        document.addEventListener("keydown", e => {
-            if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-                e.preventDefault();
-            }
-            if(e.key === "ArrowUp") setDir("up");
-            if(e.key === "ArrowDown") setDir("down");
-            if(e.key === "ArrowLeft") setDir("left");
-            if(e.key === "ArrowRight") setDir("right");
-            if(e.key.toLowerCase() === "p" || e.key === " ") {
-                togglePause();
-            }
-        });
-
-        // Dynamic Achievement System
-        function updateAchievements(currentScore) {
-            const box = document.getElementById("achievement-box");
-            const text = document.getElementById("rank-text");
-            
-            if (currentScore >= 30) {
-                box.style.background = "linear-gradient(135deg, #00ffff, #0080ff)";
-                box.style.boxShadow = "0 0 15px #00ffff";
-                box.style.color = "#000";
-                box.style.border = "1px solid #fff";
-                text.innerText = "⚡ NEON LEGEND ⚡";
-            } else if (currentScore >= 15) {
-                box.style.background = "linear-gradient(135deg, #e5e5e5, #999999)";
-                box.style.boxShadow = "0 0 15px #fff";
-                box.style.color = "#000";
-                box.style.border = "1px solid #fff";
-                text.innerText = "🥈 Silver Viper";
-            } else if (currentScore >= 5) {
-                box.style.background = "linear-gradient(135deg, #cd7f32, #a0522d)";
-                box.style.boxShadow = "0 0 15px #cd7f32";
-                box.style.color = "#fff";
-                box.style.border = "1px solid #fff";
-                text.innerText = "🥉 Bronze Snake";
-            } else {
-                box.style.background = "#222";
-                box.style.boxShadow = "none";
-                box.style.color = "#888";
-                box.style.border = "1px solid #444";
-                text.innerText = "Beginner";
-            }
-        }
-
-        function gameLoop() {
-            if (isPaused) return;
-            update();
-            draw();
-        }
-
-        function update() {
-            changingDirection = false;
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-
-            if (head.x < 0 || head.y < 0 || head.x >= canvas.width || head.y >= canvas.height) {
-                gameOver();
-                return;
-            }
-
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    gameOver();
-                    return;
-                }
-            }
-
-            snake.unshift(head);
-
-            if (head.x === food.x && head.y === food.y) {
-                beep();
-                score++;
-                document.getElementById("score").innerText = score;
-                updateAchievements(score);
-                
-                if (score > highscore) {
-                    highscore = score;
-                    localStorage.setItem("snakeHigh", highscore);
-                    document.getElementById("highscore").innerText = highscore;
-                }
-                food = randomFood();
-            } else {
-                snake.pop();
-            }
+        function start() {
+            snake = [{x: 200, y: 200}]; score = 0; dx = 20; dy = 0;
+            document.getElementById("score").innerText = "Score: 0";
+            document.getElementById("rank-text").innerText = "Beginner";
+            clearInterval(window.gameLoop);
+            window.gameLoop = setInterval(draw, speed);
         }
 
         function draw() {
-            ctx.fillStyle = "#000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Shaped Neon Snake
-            snake.forEach((part, i) => {
-                const isHead = (i === 0);
-                ctx.shadowBlur = isHead ? 15 : 10;
-                ctx.shadowColor = "#0f0";
-                
-                if (isHead) {
-                    ctx.fillStyle = "#ff0"; // Yellow Head
-                    drawRoundedRect(ctx, part.x + 1, part.y + 1, gridSize - 2, gridSize - 2, 6);
-                    ctx.fill();
-
-                    // Snake Eyes
-                    ctx.fillStyle = "#000";
-                    ctx.shadowBlur = 0;
-                    const eyeSize = 3;
-                    const eyeOffset = 5;
-
-                    if (dy < 0) {
-                        ctx.fillRect(part.x + eyeOffset, part.y + eyeOffset, eyeSize, eyeSize);
-                        ctx.fillRect(part.x + gridSize - eyeOffset - eyeSize, part.y + eyeOffset, eyeSize, eyeSize);
-                    } else if (dy > 0) {
-                        ctx.fillRect(part.x + eyeOffset, part.y + gridSize - eyeOffset - eyeSize, eyeSize, eyeSize);
-                        ctx.fillRect(part.x + gridSize - eyeOffset - eyeSize, part.y + gridSize - eyeOffset - eyeSize, eyeSize, eyeSize);
-                    } else if (dx < 0) {
-                        ctx.fillRect(part.x + eyeOffset, part.y + eyeOffset, eyeSize, eyeSize);
-                        ctx.fillRect(part.x + eyeOffset, part.y + gridSize - eyeOffset - eyeSize, eyeSize, eyeSize);
-                    } else {
-                        ctx.fillRect(part.x + gridSize - eyeOffset - eyeSize, part.y + eyeOffset, eyeSize, eyeSize);
-                        ctx.fillRect(part.x + gridSize - eyeOffset - eyeSize, part.y + gridSize - eyeOffset - eyeSize, eyeSize, eyeSize);
-                    }
-                } else {
-                    ctx.fillStyle = "#0f0"; // Sleek Green Body
-                    drawRoundedRect(ctx, part.x + 2, part.y + 2, gridSize - 4, gridSize - 4, 4);
-                    ctx.fill();
-                }
-            });
-
-            // --- Vector Drawn Apple ---
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = "#f00";
+            ctx.fillStyle = "#000"; ctx.fillRect(0,0,400,400);
             
-            let centerX = food.x + gridSize / 2;
-            let centerY = food.y + gridSize / 2;
-            
-            ctx.fillStyle = "#ff2222";
-            ctx.beginPath();
-            ctx.arc(centerX, centerY + 1, 8, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.shadowBlur = 0;
-            
-            // Stem
-            ctx.strokeStyle = "#8B4513";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY - 6);
-            ctx.quadraticCurveTo(centerX + 3, centerY - 11, centerX + 5, centerY - 10);
-            ctx.stroke();
-            
-            // Leaf
-            ctx.fillStyle = "#22cc22";
-            ctx.beginPath();
-            ctx.ellipse(centerX + 4, centerY - 9, 3, 1.5, Math.PI / 4, 0, Math.PI * 2);
-            ctx.fill();
-        }
+            // Draw Snake
+            ctx.fillStyle = "#0f0";
+            snake.forEach(s => ctx.fillRect(s.x, s.y, 18, 18));
 
-        function drawRoundedRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-        }
-
-        function gameOver(){
-            clearInterval(gameInterval);
-            ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+            // Draw Apple
             ctx.fillStyle = "#f00";
-            ctx.font = "bold 44px 'Segoe UI'";
-            ctx.textAlign = "center";
-            ctx.textBaseline = 'middle';
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = "#f00";
-            ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);
-            
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "#fff";
-            ctx.font = "18px 'Segoe UI'";
-            ctx.fillText("Score: " + score, canvas.width/2, canvas.height/2 + 50);
-            
-            setTimeout(() => {
-                start();
-            }, 1200);
-        }
+            ctx.beginPath();
+            ctx.arc(food.x + 10, food.y + 10, 8, 0, Math.PI*2);
+            ctx.fill();
 
-        function restartGame(){
-            start();
+            // Logic
+            let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            if(head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) return start();
+            snake.unshift(head);
+            if(head.x === food.x && head.y === food.y) {
+                score++; food = {x: Math.floor(Math.random()*20)*20, y: Math.floor(Math.random()*20)*20};
+                document.getElementById("score").innerText = "Score: " + score;
+                if(score >= 5) document.getElementById("rank-text").innerText = "Bronze Snake";
+            } else snake.pop();
         }
-
-        window.onload = start;
+        
+        document.addEventListener("keydown", e => {
+            if(e.key === "ArrowUp" && dy === 0) { dx=0; dy=-20; }
+            if(e.key === "ArrowDown" && dy === 0) { dx=0; dy=20; }
+            if(e.key === "ArrowLeft" && dx === 0) { dx=-20; dy=0; }
+            if(e.key === "ArrowRight" && dx === 0) { dx=20; dy=0; }
+        });
+        start();
     </script>
 </body>
 </html>
