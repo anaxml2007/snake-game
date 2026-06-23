@@ -45,6 +45,11 @@ button{
 <button onclick="restartGame()">Restart</button>
 
 <script>
+window.addEventListener("keydown", function(e) {
+    if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.key) > -1) {
+        e.preventDefault();
+    }
+}, false);    
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
